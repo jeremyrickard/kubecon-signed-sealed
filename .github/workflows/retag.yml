@@ -1,0 +1,107 @@
+name: Retag images
+on: workflow_dispatch
+
+jobs:
+  generate-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.generate-matrix.outputs.matrix }}
+   
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4
+      - uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b #v5
+        with:
+          go-version: '^1.23.7'
+      - name: Build Retag Command
+        run: |
+          sudo GOBIN=/usr/local/bin go install
+      - name: Generate Retag Matrix
+        id: generate-matrix
+        run: |
+          matrix=$(kubecon-2025-ssd retag generate -c retag.yml)
+          echo "matrix=${matrix}" >> "$GITHUB_OUTPUT"
+  retag:
+    name: "Retag ${{ matrix.retags.Name }}"
+    environment: zot
+    needs: generate-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJSON(needs.generate-matrix.outputs.matrix) }}
+    steps:
+      - uses: oras-project/setup-oras@5c0b487ce3fe0ce3ab0d034e63669e426e294e4d
+      - name: Login to Registry
+        id: docker-login
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.REGISTRY }}
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Print the retag option # now below here we should retag the images, sign them, and perhaps scan them?
+        run: | 
+          echo "Matrix: ${{ toJSON(matrix) }}"
+          echo "Source: ${{ matrix.retags.Source}}"
+          echo "Destination: ${{ matrix.retags.Destination}}"
+          echo "Tag: ${{ matrix.retags.Tag }}"
+      - name: Copy Tags to Registry # fix this so that it actually runs
+        run: | 
+          echo "Tag: ${{matrix.retags.Tag}}" 
+          oras copy -r ${{matrix.retags.Source}}:${{matrix.retags.Tag}} ${{ vars.REGISTRY }}/${{ matrix.retags.Destination}}:${{matrix.retags.Tag}}
+      - name: Setup Notation CLI
+        uses: notaryproject/notation-action/setup@b6fee73110795d6793253c673bd723f12bcf9bbb
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: sign releasd artifact with notation-azure-kv plugin
+        uses: notaryproject/notation-action/sign@v1
+        with:
+          force_referrers_tag: 'false' # use referrers api first, if supported.
+          plugin_name: azure-kv
+          plugin_url: https://github.com/Azure/notation-azure-kv/releases/download/v1.2.0/notation-azure-kv_1.2.0_linux_amd64.tar.gz
+          plugin_checksum: 06bb5198af31ce11b08c4557ae4c2cbfb09878dfa6b637b7407ebc2d57b87b34
+          key_id: https://kubecon-eu-2025-akv.vault.azure.net/keys/kubecon-eu-cert/2b994508ab764f7e82936ccdc9543c7a
+          target_artifact_reference: |-
+            ${{ vars.REGISTRY }}/${{ matrix.retags.Destination}}:${{matrix.retags.Tag}}
+          signature_format: cose
+          plugin_config: |-
+            self_signed=true
+      - name: Generate Trivy Report 
+        uses: aquasecurity/trivy-action@d43c1f16c00cfd3978dde6c07f4bbcf9eb6993ca # 0.16.1 
+        with: 
+           scan-type: "image" 
+           format: "json" 
+           output: "report.json" 
+           ignore-unfixed: true 
+           vuln-type: "os" 
+           image-ref: ${{ vars.REGISTRY }}/${{ matrix.retags.Destination}}:${{matrix.retags.Tag}}
+  
+         # check whether there are any OS package vulnerabilities 
+      - name: Check vulnerability count 
+        id: vuln_count 
+        run: | 
+           report_file="report.json" 
+           vuln_count=$(jq 'if .Results then [.Results[] | select(.Class=="os-pkgs" and .Vulnerabilities!=null) | .Vulnerabilities[]] | length else 0 end' "$report_file") 
+           oras attach --artifact-type vnd/trivy-scan ${{ vars.REGISTRY }}/${{ matrix.retags.Destination}}:${{matrix.retags.Tag}} report.json
+           echo "vuln_count=$vuln_count" >> $GITHUB_OUTPUT 
+      - name: Run Copa action 
+        if: steps.vuln_count.outputs.vuln_count != '0' 
+        id: copa 
+         # using main for testing purposes 
+         # use a tag (such as v1 or v1.0.1) at a bare minimum 
+         # recommendation is to pin to a digest for security and stability 
+         # and rely on dependabot for digest/version updates 
+        uses: project-copacetic/copa-action@3843e22efdca421adb37aa8dec103a0f1db68544
+        with: 
+           image: ${{ vars.REGISTRY }}/${{ matrix.retags.Destination}}:${{matrix.retags.Tag}}
+           image-report: "report.json" 
+           patched-tag: "patched" 
+           timeout: "5m" # optional, default is 5m 
+           output: vex.json # optional 
+           format: "openvex" # optional, default is openvex
+      - name: Push the patched image
+        if: steps.copa.conclusion == 'success' 
+        run: |
+          docker tag ${{ vars.REGISTRY }}/${{ matrix.retags.Destination}}:patched ${{ vars.REGISTRY }}/${{ matrix.retags.Destination}}:${{matrix.retags.Tag}}-patched
+          echo "we could push this and use it instead...."
+      
+         
+      
