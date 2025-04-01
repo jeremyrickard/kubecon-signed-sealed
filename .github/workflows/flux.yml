@@ -51,7 +51,7 @@ jobs:
           plugin_checksum: 06bb5198af31ce11b08c4557ae4c2cbfb09878dfa6b637b7407ebc2d57b87b34
           key_id: https://kubecon-eu-2025-akv.vault.azure.net/keys/kubecon-eu-cert/2b994508ab764f7e82936ccdc9543c7a
           target_artifact_reference: |-
-            ${{ vars.REGISTRY }}//kubecon/manifests/emojivoting:latest
+            ${{ vars.REGISTRY }}/kubecon/manifests/emojivoting:latest
           signature_format: cose
           plugin_config: |-
             self_signed=true
