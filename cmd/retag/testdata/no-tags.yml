@@ -1,0 +1,3 @@
+images:
+  - source: docker.io/library/alpine
+  - source: docker.io/library/rust

@@ -1,0 +1,24 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
+metadata:
+  name: flux-config
+  namespace: flux-system
+spec:
+  interval: 10m
+  url: oci://zot.jeremyrickard.com/kubecon/manifests/ingress
+  ref:
+    tag: latest
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: flux-config
+  namespace: flux-system
+spec:
+  interval: 10m
+  targetNamespace: default
+  prune: true
+  sourceRef:
+    kind: OCIRepository
+    name: flux-config
+  path: ./

@@ -1,0 +1,16 @@
+{
+    "version": "1.0",
+    "trustPolicies": [
+        {
+            "name": "retag-images",
+            "registryScopes": [ "*" ],
+            "signatureVerification": {
+                "level" : "strict" 
+            },
+            "trustStores": [ "ca:jeremyrickard.com" ],
+            "trustedIdentities": [
+                "x509.subject: CN=jeremyrickard.com,O=kubecon,L=London,ST=London,C=UK"
+            ]
+        }
+    ]
+}

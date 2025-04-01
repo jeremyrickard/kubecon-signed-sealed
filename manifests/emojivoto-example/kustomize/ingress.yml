@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: emoji-ingress
+  namespace: emojivoto
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /emoji-vote
+        pathType: Prefix
+        backend:
+          service:
+            name: web-svc
+            port:
+              number: 80

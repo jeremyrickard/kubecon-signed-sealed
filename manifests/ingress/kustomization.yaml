@@ -1,0 +1,8 @@
+resources:
+- ingress-nginx.yml
+images:
+- name: registry.k8s.io/ingress-nginx/kube-webhook-certgen
+  newName: zot.jeremyrickard.com/mirror/registry.k8s.io/ingress-nginx/kube-webhook-certgen
+- name: registry.k8s.io/ingress-nginx/controller
+  newName: zot.jeremyrickard.com/mirror/registry.k8s.io/ingress-nginx/controller
+

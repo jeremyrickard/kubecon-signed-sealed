@@ -1,0 +1,39 @@
+{
+  "distSpecVersion":"1.0.1",
+  "storage":{
+    "dedupe": true,
+    "gc": true,
+    "gcDelay": "1h",
+    "gcInterval": "6h",
+    "rootDirectory":"/data/zot/"
+  },
+  "http": {
+    "accessControl": {
+	    "repositories": {
+        "**": {
+	        "anonymousPolicy": ["read"],
+          "defaultPolicy": ["read", "create", "update"]
+        }
+	    }
+    },
+    "address":"0.0.0.0",
+    "port":"443",
+    "realm":"zot",
+    "compat": ["docker2s2"],
+    "tls": {
+      "cert": "/etc/letsencrypt/live/zot.jeremyrickard.com/fullchain.pem",
+      "key": "/etc/letsencrypt/live/zot.jeremyrickard.com/privkey.pem"
+    },
+    "auth": {
+      "htpasswd": {
+        "path": "/etc/zot/htpasswd"
+      },
+      "failDelay": 5
+    }
+  },
+  "log":{
+    "level":"debug",
+    "output":"/var/log/zot/zot.log",
+    "audit":"/var/log/zot/zot-audit.log"
+  }
+}

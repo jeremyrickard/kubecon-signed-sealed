@@ -1,0 +1,15 @@
+resources:
+- flux.yml
+images:
+- name: ghcr.io/fluxcd/helm-controller
+  newName: zot.jeremyrickard.com/mirror/ghcr.io/fluxcd/helm-controller
+- name: ghcr.io/fluxcd/image-automation-controller
+  newName: zot.jeremyrickard.com/mirror/ghcr.io/fluxcd/image-automation-controller
+- name: ghcr.io/fluxcd/image-reflector-controller
+  newName: zot.jeremyrickard.com/mirror/ghcr.io/fluxcd/image-reflector-controller
+- name: ghcr.io/fluxcd/kustomize-controller
+  newName: zot.jeremyrickard.com/mirror/ghcr.io/fluxcd/kustomize-controller
+- name: ghcr.io/fluxcd/notification-controller
+  newName: zot.jeremyrickard.com/mirror/ghcr.io/fluxcd/notification-controller
+- name: ghcr.io/fluxcd/source-controller
+  newName: zot.jeremyrickard.com/mirror/ghcr.io/fluxcd/source-controller

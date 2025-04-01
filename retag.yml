@@ -1,0 +1,84 @@
+images:
+  - source:  docker.io/buoyantio/emojivoto-web
+    destination: mirror/docker.io/buoyantio/emojivoto-web
+    tags:
+      - v11
+  - source: docker.io/buoyantio/emojivoto-voting-svc
+    destination: mirror/docker.io/buoyantio/emojivoto-voting-svc
+    tags: 
+      - v11
+  - source: docker.io/buoyantio/emojivoto-emoji-svc
+    destination: mirror/docker.io/buoyantio/emojivoto-emoji-svc
+    tags: 
+      - v11
+  - source: ghcr.io/fluxcd/helm-controller
+    destination: mirror/ghcr.io/fluxcd/helm-controller
+    tags:
+      - v1.2.0
+  - source: ghcr.io/fluxcd/image-automation-controller
+    destination: mirror/ghcr.io/fluxcd/image-automation-controller
+    tags:
+      - v0.40.0
+  - source: ghcr.io/fluxcd/image-reflector-controller
+    destination: mirror/ghcr.io/fluxcd/image-reflector-controller
+    tags:
+      - v0.34.0
+  - source: ghcr.io/fluxcd/kustomize-controller
+    destination: mirror/ghcr.io/fluxcd/kustomize-controller
+    tags:
+      - v1.5.1
+  - source: ghcr.io/fluxcd/notification-controller
+    destination: mirror/ghcr.io/fluxcd/notification-controller
+    tags:
+      - v1.5.0
+  - source: ghcr.io/fluxcd/source-controller
+    destination: mirror/ghcr.io/fluxcd/source-controller
+    tags:
+      - v1.5.0
+  - source: registry.k8s.io/ingress-nginx/kube-webhook-certgen
+    destination: mirror/registry.k8s.io/ingress-nginx/kube-webhook-certgen
+    tags:
+      - v1.5.2
+  - source: registry.k8s.io/ingress-nginx/controller
+    destination: mirror/registry.k8s.io/ingress-nginx/controller
+    tags:
+     - v1.12.1
+  - source: ghcr.io/kyverno/kyvernopre
+    destination: mirror/ghcr.io/kyverno/kyvernopre
+    tags:
+      - v1.11.1
+      - v1.13.4
+  - source: ghcr.io/kyverno/kyverno
+    destination: mirror/ghcr.io/kyverno/kyverno
+    tags:
+      - v1.11.1
+      - v1.13.4
+  - source: ghcr.io/kyverno/kyverno-cli
+    destination: mirror/ghcr.io/kyverno/kyverno-cli
+    tags:
+      - v1.11.1
+      - v1.13.4
+  - source: ghcr.io/kyverno/cleanup-controller
+    destination: mirror/ghcr.io/kyverno/cleanup-controller
+    tags:
+      - v1.11.1
+      - v1.13.4
+  - source: ghcr.io/kyverno/reports-controller
+    destination: mirror/ghcr.io/kyverno/reports-controller
+    tags:
+      - v1.11.1
+      - v1.13.4
+  - source: ghcr.io/kyverno/background-controller
+    destination: mirror/ghcr.io/kyverno/background-controller
+    tags:
+      - v1.11.1
+      - v1.13.4
+  - source: docker.io/bitnami/kubectl
+    destination: mirror/docker.io/bitnami/kubectl
+    tags:
+      - 1.26.4
+      - 1.26.10
+  - source: docker.io/library/busybox
+    destination: mirror/docker.io/library/busybox
+    tags:
+      - 1.35

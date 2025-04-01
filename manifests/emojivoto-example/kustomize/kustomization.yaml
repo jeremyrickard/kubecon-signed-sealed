@@ -1,0 +1,38 @@
+## Emojivoto Sample Application Kustomization
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Making sure all resources used in this tutorial are created in a dedicated namespace
+# Also specific annotations are added for later identification
+namespace: emojivoto
+commonAnnotations:
+  provider: kubernetes-sample-apps
+
+# Emojivoto resources (namespace, services, deployments, etc)
+resources:
+- ns.yml
+- web.yml
+- ingress.yml
+- emoji.yml
+- voting.yml
+- vote-bot.yml
+
+images:
+- name: docker.l5d.io/buoyantio/emojivoto-web
+  newName: zot.jeremyrickard.com/mirror/docker.io/buoyantio/emojivoto-web
+- name: docker.l5d.io/buoyantio/emojivoto-voting-svc
+  newName: zot.jeremyrickard.com/mirror/docker.io/buoyantio/emojivoto-voting-svc
+- name: docker.l5d.io/buoyantio/emojivoto-emoji-svc
+  newName: zot.jeremyrickard.com/mirror/docker.io/buoyantio/emojivoto-emoji-svc
+patches:
+  - path: patches/emoji-svc.yaml
+    target:
+      version: v1
+      kind: Service
+      name: emoji-svc
+  - path: patches/voting-svc.yaml
+    target:
+      version: v1
+      kind: Service
+      name: voting-svc
