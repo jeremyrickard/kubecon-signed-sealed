@@ -2,11 +2,7 @@ name: Publish Flux Config
 on: workflow_dispatch
 
 jobs:
-  # generate-matrix:
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     matrix: ${{ steps.generate-matrix.outputs.matrix }}
-   
+
   #   steps:
   #     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4
   #     - uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b #v5
@@ -22,35 +18,43 @@ jobs:
   #         echo "matrix=${matrix}" >> "$GITHUB_OUTPUT"
   flux:
     name: "Publish configurations as OCI with flux"
-    environment: testing
+    environment: zot
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4
       - name: Login to Registry
         id: docker-login
         uses: docker/login-action@v3
         with:
+          registry: ${{ vars.REGISTRY }}
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Setup Flux CLI
         uses: fluxcd/flux2/action@8d5f40dca5aa5d3c0fc3414457dda15a0ac92fa4
       - name: Setup Notation CLI
         uses: notaryproject/notation-action/setup@b6fee73110795d6793253c673bd723f12bcf9bbb
+      - name: "Push Flux Configuration"
+        run: |
+          flux push artifact oci://${{ vars.REGISTRY }}/kubecon/manifests/emojivoting:latest \
+            --path "./manifests/emojivoto-example/kustomize/" \
+            --source $(git config --get remote.origin.url) \
+            --revision="$(git branch --show-current)@sha1:$(git rev-parse HEAD)"
       - uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      # - name: sign releasd artifact with notation-azure-kv plugin
-      #   uses: notaryproject/notation-action/sign@v1
-      #   with:
-      #     force_referrers_tag: 'false' # use referrers api first, if supported.
-      #     plugin_name: azure-kv
-      #     plugin_url: https://github.com/Azure/notation-azure-kv/releases/download/v1.2.0/notation-azure-kv_1.2.0_linux_amd64.tar.gz
-      #     plugin_checksum: 06bb5198af31ce11b08c4557ae4c2cbfb09878dfa6b637b7407ebc2d57b87b34
-      #     key_id: https://kubecon-eu-2025-akv.vault.azure.net/keys/kubecon-eu-cert/2b994508ab764f7e82936ccdc9543c7a
-      #     target_artifact_reference: |-
-      #       ${{ vars.REGISTRY }}/${{ matrix.retags.Destination}}:${{matrix.retags.Tag}}
-      #     signature_format: cose
-      #     plugin_config: |-
-      #       self_signed=true
+      - name: sign releasd artifact with notation-azure-kv plugin
+        uses: notaryproject/notation-action/sign@v1
+        with:
+          force_referrers_tag: 'false' # use referrers api first, if supported.
+          plugin_name: azure-kv
+          plugin_url: https://github.com/Azure/notation-azure-kv/releases/download/v1.2.0/notation-azure-kv_1.2.0_linux_amd64.tar.gz
+          plugin_checksum: 06bb5198af31ce11b08c4557ae4c2cbfb09878dfa6b637b7407ebc2d57b87b34
+          key_id: https://kubecon-eu-2025-akv.vault.azure.net/keys/kubecon-eu-cert/2b994508ab764f7e82936ccdc9543c7a
+          target_artifact_reference: |-
+            ${{ vars.REGISTRY }}//kubecon/manifests/emojivoting:latest
+          signature_format: cose
+          plugin_config: |-
+            self_signed=true
       
          
       
